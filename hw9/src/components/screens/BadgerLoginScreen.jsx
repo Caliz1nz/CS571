@@ -1,9 +1,9 @@
-import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {
   Button,
   StyleSheet,
   Text,
+  ScrollView,
   View,
   TextInput,
   SafeAreaView,
@@ -15,10 +15,14 @@ function BadgerLoginScreen(props) {
   const [pin, setPin] = useState("");
 
   return (
-    <View style={styles.container}>
-      <Text style={{ fontSize: 36, marginBottom: 20 }}>BadgerChat Login</Text>
+    <ScrollView style={styles.container}>
+      <Text style={{ fontSize: 36, marginBottom: 20, textAlign: "center" }}>
+        BadgerChat Login
+      </Text>
       <SafeAreaProvider>
-        <SafeAreaView style={{ alignItems: "center", justifyContent: "center" }}>
+        <SafeAreaView
+          style={{ alignItems: "center", justifyContent: "center" }}
+        >
           <Text style={{ textAlign: "center" }}>Username</Text>
           <TextInput
             style={styles.input}
@@ -52,11 +56,9 @@ function BadgerLoginScreen(props) {
               padding: 5,
               flex: 1,
               flexDirection: "row",
-              bottom: 280
             }}
           >
             <Button
-              styles={styles.btn}
               color="grey"
               title="SIGNUP"
               onPress={() => props.setIsRegistering(true)}
@@ -69,7 +71,7 @@ function BadgerLoginScreen(props) {
           </View>
         </SafeAreaView>
       </SafeAreaProvider>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -77,8 +79,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
     top: 100,
   },
   input: {

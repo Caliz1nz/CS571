@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 function BadgerRegisterScreen(props) {
@@ -8,8 +16,10 @@ function BadgerRegisterScreen(props) {
   const [repeatPin, setRepeatPin] = useState("");
 
   return (
-    <View style={styles.container}>
-      <Text style={{ fontSize: 36, marginBottom: 12 }}>Join BadgerChat!</Text>
+    <ScrollView style={styles.container}>
+      <Text style={{ fontSize: 36, marginBottom: 12, textAlign: "center" }}>
+        Join BadgerChat!
+      </Text>
       <SafeAreaProvider>
         <SafeAreaView
           style={{ justifyContent: "center", alignItems: "center" }}
@@ -41,19 +51,29 @@ function BadgerRegisterScreen(props) {
             value={repeatPin}
             onChangeText={(t) => setRepeatPin(t)}
           />
+          {pin == "" ? (
+            <Text style={{ color: "red" }}>Please enter a pin</Text>
+          ) : /^\d{7}$/.test(pin) ? (
+            pin == repeatPin ? (
+              ""
+            ) : (
+              <Text style={{ color: "red" }}>pins do not match</Text>
+            )
+          ) : (
+            <Text style={{ color: "red" }}>a pin must be 7 digits</Text>
+          )}
           <View
             style={{
               flex: 1,
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              bottom: 280,
             }}
           >
             <Button
               color="crimson"
               title="Signup"
-              onPress={() => props.handleSignup(username, pin)}
+              onPress={() => props.handleSignup(username, pin, repeatPin)}
             />
             <Button
               color="grey"
@@ -63,7 +83,7 @@ function BadgerRegisterScreen(props) {
           </View>
         </SafeAreaView>
       </SafeAreaProvider>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -71,8 +91,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
     top: 100,
   },
   input: {

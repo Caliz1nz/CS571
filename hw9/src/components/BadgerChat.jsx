@@ -19,8 +19,21 @@ export default function App() {
   const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
-    // hmm... maybe I should load the chatroom names here
-    setChatrooms(["Hello", "World"]); // for example purposes only!
+    fetch(`https://cs571.org/rest/s25/hw9/chatrooms`, {
+      headers: {
+        "X-CS571-ID": CS571.getBadgerId()
+      }
+    })
+    .then(res => {
+      if(res.status == 200 || res.status == 304){
+        return res.json();
+      }
+      throw new Error("Cannot get the classrooms")
+    })
+    .then(data => {
+      setChatrooms(data);
+    })
+    .catch(e => console.log(e))
   }, []);
 
   function handleLogin(username, pin) {
@@ -48,6 +61,7 @@ export default function App() {
         })
         .then((data) => {
           SecureStore.setItemAsync("token", data.token);
+          SecureStore.setItemAsync("username", data.user.username);
           setIsLoggedIn(true);
           Alert.alert("Successfully authentication!");
         })
@@ -55,8 +69,11 @@ export default function App() {
     }
   }
 
-  function handleSignup(username, pin) {
-    if(checkUsernameAndPin(username, pin)){
+  function handleSignup(username, pin, repeatPin) {
+    if(repeatPin == "" || repeatPin != pin){
+      Alert.alert("pins do not match");
+    }
+    else if(checkUsernameAndPin(username, pin)){
       fetch(`https://cs571.org/rest/s25/hw9/register`, {
         method: "POST",
         credentials: "include",
@@ -82,7 +99,7 @@ export default function App() {
       .then(data => {
         setIsLoggedIn(true);
         SecureStore.setItemAsync("token", data.token);
-        Alert("Successful registration!")
+        Alert.alert("Successful registration!")
       })
       .catch(e => console.log(e));
     }
