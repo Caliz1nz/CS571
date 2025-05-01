@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Alert,
   Button,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -68,18 +69,24 @@ function BadgerRegisterScreen(props) {
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
+              margin: 5,
+              columnGap: 10
             }}
           >
+            <Pressable style={{ backgroundColor: "crimson", borderRadius: 20 }}>
             <Button
-              color="crimson"
-              title="Signup"
+              color="white"
+              title="SIGNUP"
               onPress={() => props.handleSignup(username, pin, repeatPin)}
             />
+            </Pressable>
+            <Pressable style={{ backgroundColor: "grey", borderRadius: 20 }}>
             <Button
-              color="grey"
+              color="white"
               title="NEVERMIND!"
               onPress={() => props.setIsRegistering(false)}
             />
+            </Pressable>
           </View>
         </SafeAreaView>
       </SafeAreaProvider>

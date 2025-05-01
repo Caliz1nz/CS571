@@ -22,7 +22,7 @@ function BadgerChatroomScreen(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [titleInput, setTitleInput] = useState("");
   const [bodyInput, setBodyInput] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
 
   const loadMessages = () => {
     fetch(`https://cs571.org/rest/s25/hw9/messages?chatroom=${props.name}`, {
@@ -44,7 +44,6 @@ function BadgerChatroomScreen(props) {
   };
 
   const createPost = async () => {
-    setIsSuccess(false);
     const jwt = await SecureStore.getItemAsync("token");
     fetch(`https://cs571.org/rest/s25/hw9/messages?chatroom=${props.name}`, {
       credentials: "include",
@@ -78,12 +77,32 @@ function BadgerChatroomScreen(props) {
       .then((data) => {
         setTitleInput("");
         setBodyInput("");
-        setIsSuccess(true);
+        setModalVisible(false);
+        loadMessages();
+        Alert.alert("Successfully posted!", "Successfully posted!");
       })
       .catch((e) => console.log(e));
   };
 
   useEffect(loadMessages, [props]);
+  useEffect(() => {
+    const jwt = SecureStore.getItem("token");
+    fetch(`https://cs571.org/rest/s25/hw9/whoami`, {
+      method: "GET",
+      headers: {
+        "X-CS571-ID": CS571.getBadgerId(),
+        "Authorization": `Bearer ${jwt}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.isLoggedIn) {
+          setIsLogin(false);
+        } else {
+          setIsLogin(true);
+        }
+      });
+  }, [isLoading])
 
   return (
     <View
@@ -94,41 +113,24 @@ function BadgerChatroomScreen(props) {
       ) : (
         <FlatList
           data={msg}
-          renderItem={({ item }) => <BadgerChatMessage {...item} />}
+          renderItem={({ item }) => <BadgerChatMessage {...item} loadMessages={loadMessages} />}
           keyExtractor={(m) => m.id}
           onRefresh={loadMessages}
           refreshing={isLoading}
         />
       )}
-      <Pressable
+      {isLogin == true ? (<Pressable
         style={{ height: 40, backgroundColor: "red", justifyContent: "center" }}
       >
         <Button
           color="white"
           title="ADD POST"
           onPress={() => {
-            setIsSuccess(false);
             setModalVisible(true);
           }}
         />
-      </Pressable>
+      </Pressable>) : ""}
       <Modal animationType="fade" visible={modalVisible} transparent={true}>
-        {isSuccess ? (
-          <View style={styles.successView}>
-            <Text style={{ fontSize: 25, fontWeight: "bold" }}>
-              Successfully posted
-            </Text>
-            <Text style={{ fontSize: 20 }}>Successfully posted</Text>
-            <Pressable style={{ alignItems: "flex-end" }}>
-              <Button
-                title="OK"
-                onPress={() => {
-                  setModalVisible(false);
-                }}
-              />
-            </Pressable>
-          </View>
-        ) : (
           <ScrollView style={styles.modalView}>
             <Text style={{ fontSize: 25, marginBottom: 20 }}>
               Create A Post
@@ -182,7 +184,6 @@ function BadgerChatroomScreen(props) {
               </Pressable>
             </View>
           </ScrollView>
-        )}
       </Modal>
     </View>
   );
@@ -208,21 +209,6 @@ const styles = StyleSheet.create({
     shadowColor: "black",
     shadowOpacity: 0.1,
     shadowRadius: 100,
-    alignSelf: "center",
-  },
-  successView: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 35,
-    backgroundColor: "white",
-    width: Dimensions.get("screen").width * 0.94,
-    opacity: 1,
-    top: Dimensions.get("screen").height * 0.4,
-    marginBottom: Dimensions.get("screen").height * 0.85,
-    shadowColor: "black",
-    shadowOpacity: 0.1,
-    shadowRadius: 100,
-    justifyContent: "center",
     alignSelf: "center",
   },
   inputTitle: {

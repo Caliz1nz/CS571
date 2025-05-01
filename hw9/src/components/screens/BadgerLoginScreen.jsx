@@ -7,8 +7,10 @@ import {
   View,
   TextInput,
   SafeAreaView,
+  Pressable,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as SecureStore from "expo-secure-store";
 
 function BadgerLoginScreen(props) {
   const [username, setUsername] = useState("");
@@ -40,14 +42,16 @@ function BadgerLoginScreen(props) {
             value={pin}
             onChangeText={(t) => setPin(t)}
           />
-          <Button
-            color="crimson"
+          <Pressable style={{ backgroundColor: "crimson", margin:5, borderRadius: 10 }}>
+            <Button
             title="Login"
+            color="white"
             onPress={(e) => {
               e?.preventDefault();
               props.handleLogin(username, pin);
             }}
           />
+          </Pressable>
           <Text>New here?</Text>
           <View
             style={{
@@ -56,18 +60,27 @@ function BadgerLoginScreen(props) {
               padding: 5,
               flex: 1,
               flexDirection: "row",
+              columnGap: 10,
+              margin: 5
             }}
           >
+            <Pressable style={{ backgroundColor: "grey", borderRadius: 20 }}>
             <Button
-              color="grey"
+              color="white"
               title="SIGNUP"
               onPress={() => props.setIsRegistering(true)}
             />
+            </Pressable>
+            <Pressable style={{ backgroundColor: "grey", borderRadius: 20 }}>
             <Button
-              color="grey"
+              color="white"
               title="CONTINUE AS A GUEST"
-              onPress={() => props.setIsGuest(true)}
+              onPress={() => {
+                props.setIsGuest(true);
+                SecureStore.deleteItemAsync("token");
+              }}
             />
+            </Pressable>
           </View>
         </SafeAreaView>
       </SafeAreaProvider>

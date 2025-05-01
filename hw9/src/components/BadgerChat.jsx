@@ -8,6 +8,8 @@ import BadgerChatroomScreen from "./screens/BadgerChatroomScreen";
 import BadgerRegisterScreen from "./screens/BadgerRegisterScreen";
 import BadgerLoginScreen from "./screens/BadgerLoginScreen";
 import BadgerLandingScreen from "./screens/BadgerLandingScreen";
+import BadgerLogoutScreen from "./screens/BadgerLogoutScreen";
+import BadgerConversionScreen from "./screens/BadgerConversionScreen";
 import { Alert } from "react-native";
 
 const ChatDrawer = createDrawerNavigator();
@@ -21,24 +23,23 @@ export default function App() {
   useEffect(() => {
     fetch(`https://cs571.org/rest/s25/hw9/chatrooms`, {
       headers: {
-        "X-CS571-ID": CS571.getBadgerId()
-      }
+        "X-CS571-ID": CS571.getBadgerId(),
+      },
     })
-    .then(res => {
-      if(res.status == 200 || res.status == 304){
-        return res.json();
-      }
-      throw new Error("Cannot get the classrooms")
-    })
-    .then(data => {
-      setChatrooms(data);
-    })
-    .catch(e => console.log(e))
+      .then((res) => {
+        if (res.status == 200 || res.status == 304) {
+          return res.json();
+        }
+        throw new Error("Cannot get the classrooms");
+      })
+      .then((data) => {
+        setChatrooms(data);
+      })
+      .catch((e) => console.log(e));
   }, []);
 
   function handleLogin(username, pin) {
-     if(checkUsernameAndPin(username, pin))
-      {
+    if (checkUsernameAndPin(username, pin)) {
       fetch(`https://cs571.org/rest/s25/hw9/login`, {
         method: "POST",
         credentials: "include",
@@ -53,7 +54,7 @@ export default function App() {
       })
         .then((res) => {
           if (res.status == 401) {
-            setIsLoggedIn(false); 
+            setIsLoggedIn(false);
             Alert.alert("That username or pin is incorrect!");
             throw new Error("Incorrect username or pin!");
           }
@@ -61,7 +62,6 @@ export default function App() {
         })
         .then((data) => {
           SecureStore.setItemAsync("token", data.token);
-          SecureStore.setItemAsync("username", data.user.username);
           setIsLoggedIn(true);
           Alert.alert("Successfully authentication!");
         })
@@ -70,55 +70,51 @@ export default function App() {
   }
 
   function handleSignup(username, pin, repeatPin) {
-    if(repeatPin == "" || repeatPin != pin){
+    if (repeatPin == "" || repeatPin != pin) {
       Alert.alert("pins do not match");
-    }
-    else if(checkUsernameAndPin(username, pin)){
+    } else if (checkUsernameAndPin(username, pin)) {
       fetch(`https://cs571.org/rest/s25/hw9/register`, {
         method: "POST",
         credentials: "include",
         headers: {
           "X-CS571-ID": CS571.getBadgerId(),
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: username,
-          pin: pin
+          pin: pin,
         }),
       })
-      .then(res => {
-        if(res.status == 409){
-          Alert.alert("The user already exists");
-          throw new Error("Duplicated user");
-        } else if(res.status == 413){
-          Alert.alert("username must be 64 characters or fewer");
-          throw new Error("Bad username");
-        }
-        return res.json();
-      })
-      .then(data => {
-        setIsLoggedIn(true);
-        SecureStore.setItemAsync("token", data.token);
-        Alert.alert("Successful registration!")
-      })
-      .catch(e => console.log(e));
+        .then((res) => {
+          if (res.status == 409) {
+            Alert.alert("The user already exists");
+            throw new Error("Duplicated user");
+          } else if (res.status == 413) {
+            Alert.alert("username must be 64 characters or fewer");
+            throw new Error("Bad username");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setIsLoggedIn(true);
+          SecureStore.setItemAsync("token", data.token);
+          Alert.alert("Successful registration!");
+        })
+        .catch((e) => console.log(e));
     }
   }
 
   const checkUsernameAndPin = (username, pin) => {
     const lenRegex = /^\d{7}$/;
-    if (
-      username.length == 0 ||
-      pin.length == 0
-    ) {
+    if (username.length == 0 || pin.length == 0) {
       Alert.alert("Please enter the username or pin");
       return false;
-    } else if(!lenRegex.test(pin)) {
-      Alert.alert("A pin must be 7 digits")
+    } else if (!lenRegex.test(pin)) {
+      Alert.alert("A pin must be 7 digits");
       return false;
     }
     return true;
-  }
+  };
 
   if (isLoggedIn || isGuest) {
     return (
@@ -132,6 +128,24 @@ export default function App() {
               </ChatDrawer.Screen>
             );
           })}
+          {isGuest ? (
+            <ChatDrawer.Screen name="Signup">
+              {() => (
+                <BadgerConversionScreen
+                  setIsRegistering={setIsRegistering}
+                  setIsGuest={setIsGuest}
+                />
+              )}
+            </ChatDrawer.Screen>
+          ) : (
+            <ChatDrawer.Screen name="Logout">
+              {() => (
+                <BadgerLogoutScreen
+                  setIsLoggedIn={setIsLoggedIn}
+                />
+              )}
+            </ChatDrawer.Screen>
+          )}
         </ChatDrawer.Navigator>
       </NavigationContainer>
     );
